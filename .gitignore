@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+.env
+
+# Local scenarios carry a real jurisdiction's impact list. They stay on the machine
+# that built them.
+data/scenarios/*.local.json
+
+# Document build intermediates (.tex, .log, .aux, rendered page images)
+build/
+
+# Node is only used to generate the Word manual, not by the app
+node_modules/
