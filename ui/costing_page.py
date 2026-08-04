@@ -17,13 +17,15 @@ from pa.models import (
 )
 from pa.rules import CATEGORIES
 from .common import (
-    active_project, date_input_optional, get_scenario, md, money, money_plain, touch,
+    active_project, date_input_optional, get_scenario, md, money, money_plain,
+    purpose, touch,
 )
 
 
 def render() -> None:
     s = get_scenario()
     st.title("Cost Buildup")
+    purpose("Cost Buildup")
 
     if not s.projects:
         st.warning("Formulate at least one project first.")

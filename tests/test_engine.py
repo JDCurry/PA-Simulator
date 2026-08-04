@@ -1171,6 +1171,121 @@ def test_training_scenario_is_completable_to_a_passing_score():
     assert card.percent >= 80, card.percent
 
 
+# -- guidance: where am I, what next -------------------------------------------
+
+
+def test_blank_scenario_is_not_reported_as_failing():
+    """An empty form is not a broken package. Showing four blocking findings before
+    the user has typed anything teaches them to ignore the finding count."""
+    from pa.guidance import is_untouched, next_action, progress
+    from pa.scenario import blank_scenario
+
+    s = blank_scenario()
+    assert is_untouched(s) is True
+    p = progress(s)
+    assert p.completed == 0
+    assert p.current is not None and p.current.number == 1
+    action = next_action(s)
+    assert action.severity == "info"
+    assert "training scenario" in action.headline.lower()
+
+
+def test_scenario_stops_being_untouched_once_work_starts():
+    from pa.guidance import is_untouched
+    from pa.scenario import blank_scenario
+
+    s = blank_scenario()
+    s.applicant.name = "Test City"
+    assert is_untouched(s) is False
+
+
+def test_progress_advances_step_by_step():
+    from pa.guidance import progress
+    from pa.scenario import blank_scenario
+
+    s = blank_scenario()
+    assert progress(s).current.number == 1
+
+    s.applicant.name = "Test City"
+    s.disaster.declaration_date = date(2026, 4, 7)
+    assert progress(s).current.number == 2          # now needs sites
+
+    site = a_site(category="A")
+    s.sites = [site]
+    assert progress(s).current.number == 3          # now needs grouping
+
+    p = Project(title="Debris", category="A", site_ids=[site.id])
+    s.projects = [p]
+    assert progress(s).current.number == 4          # now needs costs
+
+    p.costs = [SimpleCostLine(cost_type=CostType.CONTRACT, description="Haul",
+                              quantity=1, unit_cost=50_000,
+                              competed=True, sam_debarment_checked=True)]
+    assert progress(s).current.number == 5          # now needs compliance work
+
+
+def test_next_action_points_at_the_page_that_fixes_it():
+    """The instruction is only useful if it names where to go."""
+    from pa.guidance import FINDING_PAGE, next_action
+    from pa.scenario import SCENARIO_DIR, load_scenario
+
+    path = SCENARIO_DIR / "training_cascade_valley.json"
+    if not path.exists():
+        pytest.skip("training scenario not built")
+
+    s = load_scenario(path)
+    action = next_action(s)
+    assert action.severity == "blocking"
+    assert action.page in ("Scenario", "Impact List", "Cost Buildup", "Package")
+    assert action.where and action.headline
+
+    # Every finding category must map to a page, or the user gets sent nowhere.
+    from pa.validation import review
+    for f in review(s).findings:
+        assert f.test in FINDING_PAGE, f"no page mapping for finding test {f.test!r}"
+
+
+def test_next_action_surfaces_unclaimed_money_once_nothing_is_blocking():
+    from pa.guidance import next_action
+    s = make_scenario()
+    # Without an RPA on file the deadline check blocks, which is correct but is not
+    # what this test is about.
+    s.disaster.rpa_submitted_date = date(2026, 4, 20)
+    site = a_site(category="C")
+    s.sites = [site]
+    s.projects = [Project(
+        title="Road", category="C", site_ids=[site.id],
+        scope_of_work="Restore to pre-disaster design.",
+        costs=[SimpleCostLine(cost_type=CostType.CONTRACT, description="Repair",
+                              quantity=1, unit_cost=500_000,
+                              competed=True, sam_debarment_checked=True)],
+    )]
+    action = next_action(s)
+    assert action.severity == "opportunity"
+    assert "management cost" in action.headline.lower()
+
+
+def test_every_page_has_a_plain_english_purpose():
+    """A newcomer needs to know what a page is FOR before the expert framing lands."""
+    import app
+    from pa.guidance import PAGE_PURPOSE
+
+    for key in app.PAGES:
+        assert key in PAGE_PURPOSE, f"no plain-English purpose for page {key!r}"
+        assert len(PAGE_PURPOSE[key]) > 20
+
+
+def test_navigation_labels_avoid_markdown_list_syntax():
+    """'1. Foo' is an ordered-list item in markdown; Streamlit renders it as one and
+    swallows the number, silently destroying the sequence cue."""
+    import app
+    import re
+
+    for key, (_, label) in app.PAGES.items():
+        assert not re.match(r"^\d+[.)]\s", label), (
+            f"label {label!r} for {key!r} would render as a markdown list")
+
+
 def test_only_the_fictional_training_scenario_ships():
     """No real jurisdiction's impact list may be committed to the repository."""
     from pa.scenario import SCENARIO_DIR

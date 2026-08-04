@@ -9,13 +9,14 @@ from pa.costing import summarize_project
 from pa.formulation import auto_group, classify, review_grouping
 from pa.models import Project
 from pa.rules import CATEGORIES
-from .common import get_scenario, md, money, touch
+from .common import get_scenario, md, money, purpose, touch
 
 
 
 def render() -> None:
     s = get_scenario()
     st.title("Project Formulation")
+    purpose("Formulation")
     st.write(
         "Grouping is a funding decision, not a filing decision. It determines whether "
         "costs clear the minimum, whether a project crosses the large-project "

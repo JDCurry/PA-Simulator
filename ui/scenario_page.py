@@ -8,12 +8,13 @@ from pa.rules import (
     CostShare, DEADLINE_LABELS, NO_EXTENSION_DEADLINES, PRIMARY_CAUSES, RuleSet,
     Thresholds,
 )
-from .common import date_input_optional, get_scenario, money0, touch
+from .common import date_input_optional, get_scenario, money0, purpose, touch
 
 
 def render() -> None:
     s = get_scenario()
     st.title("Scenario")
+    purpose("Scenario")
     st.write(
         "Everything downstream is computed from what is set here. The thresholds and "
         "cost share in particular are indexed annually and set by the declaration — "

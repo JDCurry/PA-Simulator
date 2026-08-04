@@ -13,6 +13,16 @@ Built against **PAPPG V5 Amended (January 2025)** and **FEMA Policy FP-104-23-00
 > Not affiliated with FEMA. A planning and training aid. Verify every figure against
 > the current PAPPG and your own award before relying on it.
 
+**User Manual** — five-minute start, page-by-page reference, a guided walkthrough from
+a failing package to a passing one, and an instructor section. Available three ways, all
+generated from one source: [Markdown](docs/USER_MANUAL.md),
+[PDF](docs/PA_Workbench_User_Manual.pdf),
+[Word](docs/PA_Workbench_User_Manual.docx) — and in the app itself on the **Manual**
+page, which also offers all three as downloads.
+
+**[Publishing to Streamlit Community Cloud](docs/DEPLOYING.md)** — free, and the result
+is a URL. About fifteen minutes.
+
 ---
 
 ## What it does
@@ -100,6 +110,38 @@ rules = replace(
 Scenarios are plain JSON and carry their own ruleset, so a file written for one
 declaration never silently inherits another's thresholds.
 
+## Running it
+
+```bash
+pip install -r requirements.txt
+```
+
+```bash
+streamlit run app.py
+```
+
+Tests:
+
+```bash
+python -m pytest tests/ -q
+```
+
+Rebuild the PDF and Word copies of the manual after editing `docs/USER_MANUAL.md`:
+
+```bash
+python tools/build_manual_docs.py
+```
+
+That needs XeLaTeX for the PDF and Node with the `docx` package for Word. Either can be
+absent; the script reports what it produced. The in-app Manual page reads the markdown
+directly, so it never needs a build step.
+
+### Deploying
+
+**Streamlit Community Cloud** — point it at this repository and `app.py`. Nothing
+further is required.
+
+**Render** — `render.yaml` is included and the repository deploys as-is.
 
 ## Scenarios
 
@@ -150,6 +192,10 @@ pa/                 the engine — no Streamlit dependency, drivable from a scri
   scoring.py        training-mode rubric
   scenario.py       JSON serialization
 ui/                 Streamlit pages
+docs/
+  USER_MANUAL.md    the manual source, rendered in-app on the Manual page
+  PA_Workbench_User_Manual.pdf / .docx   generated from it, for printing and handout
+  DEPLOYING.md      Streamlit Community Cloud walkthrough
 data/
   equipment_rates_2025.csv    465 rates, extracted from the FEMA schedule
   scenarios/                  bundled scenarios; *.local.json is gitignored

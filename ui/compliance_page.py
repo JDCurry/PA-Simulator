@@ -6,7 +6,7 @@ from __future__ import annotations
 import streamlit as st
 
 from pa.validation import review
-from .common import finding_block, get_scenario
+from .common import finding_block, get_scenario, purpose
 
 _TEST_BLURB = {
     "Applicant": "Is the entity eligible to receive Public Assistance at all, and has "
@@ -32,6 +32,7 @@ _TEST_BLURB = {
 def render() -> None:
     s = get_scenario()
     st.title("Compliance Review")
+    purpose("Compliance")
     st.write(
         "FEMA tests applicant, facility, work, and cost independently. A failure on "
         "any one of them ends the project regardless of how strong the other three "

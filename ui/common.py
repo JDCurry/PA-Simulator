@@ -147,12 +147,49 @@ def _slug(text: str) -> str:
 
 def header(scenario: Scenario) -> None:
     d = scenario.disaster
-    bits = [scenario.applicant.name or "No applicant set"]
+    bits = [scenario.applicant.name or "No applicant set yet"]
     if d.number:
         bits.append(d.number)
     if d.declaration_date:
         bits.append(f"declared {d.declaration_date:%b %d, %Y}")
     st.caption(" • ".join(bits))
+
+
+def purpose(page: str) -> None:
+    """One plain-English sentence on what this page is for.
+
+    Every page below this line assumes familiarity with the program. This line does
+    not, and it comes first deliberately -- somebody who has never done this needs to
+    know what a page is FOR before the expert framing means anything.
+    """
+    from pa.guidance import PAGE_PURPOSE
+
+    text = PAGE_PURPOSE.get(page)
+    if text:
+        st.info(text)
+
+
+def next_step_footer(scenario: Scenario, page: str) -> None:
+    """Carry the user onward rather than leaving them on a finished page."""
+    from pa.guidance import is_untouched, next_action
+
+    if is_untouched(scenario):
+        return
+
+    action = next_action(scenario)
+    st.divider()
+    left, right = st.columns([4, 1])
+    with left:
+        st.caption("DO THIS NEXT")
+        st.markdown(f"**{md(action.headline)}** — {md(action.why)}")
+    with right:
+        if action.page != page:
+            if st.button(f"Go to {action.page}", use_container_width=True,
+                         key=f"footer_nav_{page}"):
+                st.session_state["nav"] = action.page
+                st.rerun()
+        else:
+            st.caption(f"On this page: {md(action.where)}")
 
 
 def date_input_optional(label: str, value: date | None, key: str) -> date | None:

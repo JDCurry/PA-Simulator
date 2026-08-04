@@ -9,7 +9,7 @@ from pa.rules import (
     CATEGORIES, DEADLINE_LABELS, NO_EXTENSION_DEADLINES, WorkType,
 )
 from pa.scoring import REFLECTION_PROMPTS, score
-from .common import get_scenario, md, money
+from .common import get_scenario, md, money, purpose
 
 PA_PROCESS = [
     ("Phase 1 — Recovery Scoping Meeting", [
@@ -46,6 +46,7 @@ PA_PROCESS = [
 def render() -> None:
     s = get_scenario()
     st.title("Training")
+    purpose("Training")
 
     tab_score, tab_process, tab_ref, tab_exercise = st.tabs(
         ["Scorecard", "The PA process", "Category reference", "Exercise"]

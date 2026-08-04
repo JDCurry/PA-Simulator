@@ -8,7 +8,7 @@ import streamlit as st
 from pa.export import impact_list_csv
 from pa.models import Site
 from pa.rules import CATEGORIES, LABOR_TYPES, PRIMARY_CAUSES, PRIORITIES
-from .common import get_scenario, money, money_plain, touch
+from .common import get_scenario, money, money_plain, purpose, touch
 
 _GRID_COLUMNS = [
     "Category", "Name", "Address", "City", "State", "Latitude", "Longitude",
@@ -37,6 +37,7 @@ def _to_frame(sites: list[Site]) -> pd.DataFrame:
 def render() -> None:
     s = get_scenario()
     st.title("Impact List")
+    purpose("Impact List")
     st.write(
         "The impact list is due 60 days after the Recovery Scoping Meeting. It is not "
         "a formality — FEMA formulates projects from these rows, and a site that is "

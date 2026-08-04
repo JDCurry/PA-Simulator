@@ -15,12 +15,13 @@ from pa.export import (
 )
 from pa.formulation import classify
 from pa.rules import CATEGORIES
-from .common import active_project, get_scenario, money, money_plain, touch
+from .common import active_project, get_scenario, money, money_plain, purpose, touch
 
 
 def render() -> None:
     s = get_scenario()
     st.title("Package")
+    purpose("Package")
 
     if not s.projects:
         st.warning("Formulate at least one project first.")
